@@ -63,7 +63,7 @@ def main():
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
     toolbox.register('mate', tools.cxTwoPoint)
-    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1, 
+    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1,\
             indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
