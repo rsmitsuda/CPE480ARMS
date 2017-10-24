@@ -43,10 +43,26 @@ def mutateImg(img):
 def evaluate(img):
     return sum(img.bytes)
 
+def validateArgs(args):
+    parsed = []
+
+    for i in range(0, len(args), 2):
+        try:
+            inputPair = (args[i], float(args[i + 1]))
+        except ValueError:
+            sys.stderr.write('Invalid weight - %s\n' % (args[i + 1]))
+            sys.exit(1)
+
+        parsed.append(inputPair)
+
+    return parsed
+
 def main():
     if len(sys.argv) < 2:
-        print 'Usage: platform <img1> ...'
+        print 'Usage: platform <img1> <weight1> ...'
         sys.exit(1)
+
+    args = validateArgs(sys.argv[1:])
 
     creator.create('MaxFitness', base.Fitness, weights=(1.0,))
     creator.create('Image', bytearray, fitness=creator.MaxFitness)
@@ -58,13 +74,17 @@ def main():
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
 
-    runIterations(toolbox)
+    runIterations(toolbox, args)
 
-def runIterations(toolbox):
+def runIterations(toolbox, args):
     population = []
        
-    for a in sys.argv[2:]:
-        population.append(toolbox.createImageInd(a))
+    for a in args:
+        try:
+            population.append(toolbox.createImageInd(a[0]))
+        except:
+            sys.stderr.write('Invalid filename - %s\n' % (a[0]))
+            sys.exit(1)
 
     for p in population:
         p.fitness.values = evaluate(p)
