@@ -115,5 +115,14 @@ def runIterations(toolbox, args):
 
         population[:] = best
 
+    outputImages(toolbox, population, 1)
+
+def outputImages(population, n):
+    best = tools.selBest(population, n)   
+
+    firstImage = Image.frombytes('RGB', len(best[0]), best[0])
+    firstImage.show()
+    firstImage.save('output', 'PNG')
+
 if __name__ == '__main__':
     main()
