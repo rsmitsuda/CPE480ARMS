@@ -51,7 +51,7 @@ def validateArgs(args):
     return parsed
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print 'Usage: platform <img1> <weight1> ...'
         sys.exit(1)
 
