@@ -109,7 +109,7 @@ def runIterations(toolbox, args):
 
         population[:] = best
 
-    outputImages(toolbox, population, 1)
+    outputImages(population, 1)
 
 def outputImages(population, n):
     best = tools.selBest(population, n)   
