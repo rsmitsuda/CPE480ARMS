@@ -9,6 +9,7 @@ NUM_GEN = 50
 PROB_MATE = 0.5
 PROB_MUT = 0.4
 
+# Wrapper to extract bytes from an image
 class ImageWrapper(object):
     def __init__(self, filename):
         img = Image.open(filename)
@@ -24,21 +25,13 @@ class ImageWrapper(object):
     def __init__(self, img):
         self.bytes = bytearray(img.bytes)
 
+# Creates a DEAP bytearray individual from a filename
 def createImageInd(filename):
     img = creator.Image()   
     imgWrap = ImageWrapper(filename)
     img[:] = imgWrap.bytes
 
     return img
-
-def combineImgs(img1, img2):
-    tools.cxTwoPoint(img1.bytes, img2.bytes)
-
-def mutateImg(img):
-    mut = ImageWrapper(img)
-    mut.bytes = tools.mutGaussian(img.bytes, 0, 1, 1, 1.0 / len(img.bytes))
-
-    return mut
 
 def evaluate(img):
     return sum(img.bytes)
@@ -69,8 +62,9 @@ def main():
 
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
-    toolbox.register('mate', combineImgs)
-    toolbox.register('mutate', mutateImg)
+    toolbox.register('mate', tools.cxTwoPoint)
+    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1, 
+            indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
 
