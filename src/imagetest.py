@@ -15,15 +15,15 @@ class ImageWrapper(object):
         img = Image.open(filename)
         bytesObj = io.BytesIO()
 
-        img.save(self.data)
+        img.save(bytesObj, img.format)
         img.close()
 
-        self.bytes = bytearray(bytesObj.value())
+        self.bytes = bytearray(bytesObj.getvalue())
 
         bytesObj.close()
 
-    def __init__(self, img):
-        self.bytes = bytearray(img.bytes)
+    def copy(self, img):
+        img.bytes = bytearray(self.bytes)
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename):
@@ -34,7 +34,7 @@ def createImageInd(filename):
     return img
 
 def evaluate(img):
-    return sum(img.bytes)
+    return float(sum(img)), (len(img))
 
 def validateArgs(args):
     parsed = []
