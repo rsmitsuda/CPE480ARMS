@@ -140,7 +140,6 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-    print ((bestBuffer))
 #    firstImage = Image.frombytes('RGBA', (best[0].width, best[0].height), \
 #            bestBuffer)
 #    firstImage.show()
