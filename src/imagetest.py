@@ -63,7 +63,7 @@ def main():
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
     toolbox.register('mate', tools.cxTwoPoint)
-    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1,\
+    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1.0,\
             indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
@@ -89,10 +89,10 @@ def runIterations(toolbox, args):
         best = [toolbox.clone(p) for p in best]
 
         for j in range(0, len(best), 2):
-            img1 = best[i]
+            img1 = best[j]
 
-            if (i < len(best) - 1):
-                img2 = best[i + 1]
+            if (j < len(best) - 1):
+                img2 = best[j + 1]
                 
                 if random.random() < PROB_MATE:
                     toolbox.mate(img1, img2)
