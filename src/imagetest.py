@@ -75,8 +75,9 @@ def runIterations(toolbox, args):
        
     for a in args:
         try:
-            population.append(toolbox.createImageInd(a[0]))
-        except:
+            population.append(toolbox.addImg(a[0]))
+        except Exception as e:
+            print e
             sys.stderr.write('Invalid filename - %s\n' % (a[0]))
             sys.exit(1)
 
