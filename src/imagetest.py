@@ -5,9 +5,9 @@ import os
 import io
 import random
 
-NUM_GEN = 50
+NUM_GEN = 20
 PROB_MATE = 0.5
-PROB_MUT = 0.4
+PROB_MUT = 0.1
 
 # Wrapper to extract bytes from an image
 class ImageWrapper(object):
@@ -52,6 +52,10 @@ def validateArgs(args):
             sys.exit(1)
 
         parsed.append(inputPair)
+
+    if sum([a[1] for a in parsed]) != 1.0:
+        sys.stderr.write('Weights must add up to 1\n')
+        sys.exit(1)
 
     return parsed
 
@@ -124,7 +128,7 @@ def outputImages(population, n):
     firstImage = Image.frombytes('RGB', (best[0].width, best[0].height), \
             str(best[0]))
     firstImage.show()
-    firstImage.save('output', 'PNG')
+    firstImage.save('output.png', 'PNG')
 
 if __name__ == '__main__':
     main()
