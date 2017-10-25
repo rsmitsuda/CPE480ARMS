@@ -129,7 +129,16 @@ def outputImages(population, n):
     best = tools.selBest(population, n)   
 
     bestImage = best[0]
-    bestBuffer = ''.join([chr(int(b)) for b in bestImage[:]])
+
+    numVals = [int(b) for b in bestImage]
+
+    for i in range(len(numVals)):
+        if numVals[i] > 255:
+            numVals[i] = 255
+        if numVals[i] < 0:
+            numVals[i] = 0
+
+    bestBuffer = ''.join([chr(i) for i in numVals])
 
     print ((bestBuffer))
 #    firstImage = Image.frombytes('RGBA', (best[0].width, best[0].height), \
