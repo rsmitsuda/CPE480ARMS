@@ -34,7 +34,7 @@ def createImageInd(filename):
     return img
 
 def evaluate(img):
-    return float(sum(img)), (len(img))
+    return (float(sum(img)),)
 
 def validateArgs(args):
     parsed = []
