@@ -15,6 +15,9 @@ class ImageWrapper(object):
         img = Image.open(filename)
         bytesObj = io.BytesIO()
 
+        self.width = img.width
+        self.height = img.height
+
         img.save(bytesObj, img.format)
         img.close()
 
@@ -30,6 +33,8 @@ def createImageInd(filename):
     img = creator.Image()   
     imgWrap = ImageWrapper(filename)
     img[:] = imgWrap.bytes
+    img.width = imgWrap.width
+    img.height = imgWrap.height
 
     return img
 
@@ -58,7 +63,7 @@ def main():
     args = validateArgs(sys.argv[1:])
 
     creator.create('MaxFitness', base.Fitness, weights=(1.0,))
-    creator.create('Image', bytearray, fitness=creator.MaxFitness)
+    creator.create('Image', list, fitness=creator.MaxFitness, width=0, height=0)
 
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
@@ -102,6 +107,7 @@ def runIterations(toolbox, args):
         for img in best:
             if random.random() < PROB_MUT:
                 toolbox.mutate(img)
+
                 del img.fitness.values
 
         for img in best:
@@ -115,7 +121,8 @@ def runIterations(toolbox, args):
 def outputImages(population, n):
     best = tools.selBest(population, n)   
 
-    firstImage = Image.frombytes('RGB', len(best[0]), best[0])
+    firstImage = Image.frombytes('RGB', (best[0].width, best[0].height), \
+            str(best[0]))
     firstImage.show()
     firstImage.save('output', 'PNG')
 
