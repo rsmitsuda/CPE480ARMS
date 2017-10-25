@@ -21,7 +21,10 @@ class ImageWrapper(object):
         img.save(bytesObj, img.format)
         img.close()
 
-        self.bytes = bytearray(bytesObj.getvalue())
+        bytesObj.seek(0)
+        self.bytes = bytearray(bytesObj.read1(-1))
+
+        print len(self.bytes)
 
         bytesObj.close()
 
@@ -125,10 +128,16 @@ def runIterations(toolbox, args):
 def outputImages(population, n):
     best = tools.selBest(population, n)   
 
-    firstImage = Image.frombytes('RGB', (best[0].width, best[0].height), \
-            str(best[0]))
-    firstImage.show()
-    firstImage.save('output.png', 'PNG')
+    bestImage = best[0]
+    bestBuffer = ''.join([chr(int(b)) for b in bestImage[:]])
+
+    print ((bestBuffer))
+#    firstImage = Image.frombytes('RGBA', (best[0].width, best[0].height), \
+#            bestBuffer)
+#    firstImage.show()
+
+    with open('output.png', 'wb') as f:
+        f.write(bestBuffer)
 
 if __name__ == '__main__':
     main()
