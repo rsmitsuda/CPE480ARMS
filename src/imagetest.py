@@ -143,13 +143,11 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-    print [hex(f) for f in bestImage.header]
-
-    with open('output.tif', 'wb') as f:
+    with open('output.tiff', 'wb') as f:
         f.write(bestImage.header)
         f.write(bestBuffer)
 
-    timg = Image.open('output.tif')
+    timg = Image.open('output.tiff')
     timg.save('output.png', 'PNG')
 
 if __name__ == '__main__':
