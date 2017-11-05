@@ -8,6 +8,7 @@ import random
 NUM_GEN = 20
 PROB_MATE = 0.5
 PROB_MUT = 0.1
+PNG_HEADER_SIZE = 8
 
 # Wrapper to extract bytes from an image
 class ImageWrapper(object):
@@ -18,13 +19,13 @@ class ImageWrapper(object):
         self.width = img.width
         self.height = img.height
 
-        img.save(bytesObj, img.format)
+        img.save(bytesObj, 'PNG')
         img.close()
 
         bytesObj.seek(0)
-        self.bytes = bytearray(bytesObj.read1(-1))
-
-        print len(self.bytes)
+        self.rawBytes = bytearray(bytesObj.read1(-1))
+        self.header = self.rawBytes[:PNG_HEADER_SIZE]
+        self.bytes = self.rawBytes[PNG_HEADER_SIZE:]
 
         bytesObj.close()
 
@@ -38,11 +39,12 @@ def createImageInd(filename):
     img[:] = imgWrap.bytes
     img.width = imgWrap.width
     img.height = imgWrap.height
+    img.header = imgWrap.header
 
     return img
 
 def evaluate(img):
-    return (float(sum(img)),)
+    return (float(sum(img) / len(img)),)
 
 def validateArgs(args):
     parsed = []
@@ -70,7 +72,8 @@ def main():
     args = validateArgs(sys.argv[1:])
 
     creator.create('MaxFitness', base.Fitness, weights=(1.0,))
-    creator.create('Image', list, fitness=creator.MaxFitness, width=0, height=0)
+    creator.create('Image', list, fitness=creator.MaxFitness, width=0, \
+            height=0, header=None)
 
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
@@ -140,11 +143,8 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-#    firstImage = Image.frombytes('RGBA', (best[0].width, best[0].height), \
-#            bestBuffer)
-#    firstImage.show()
-
     with open('output.png', 'wb') as f:
+        f.write(bestImage.header)
         f.write(bestBuffer)
 
 if __name__ == '__main__':
