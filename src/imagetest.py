@@ -7,7 +7,7 @@ import random
 
 NUM_GEN = 20
 PROB_MATE = 0.5
-PROB_MUT = 0.1
+PROB_MUT = 0.2
 PNG_HEADER_SIZE = 8
 
 # Wrapper to extract bytes from an image
@@ -19,7 +19,7 @@ class ImageWrapper(object):
         self.width = img.width
         self.height = img.height
 
-        img.save(bytesObj, 'PNG')
+        img.save(bytesObj, 'TIFF', compression='')
         img.close()
 
         bytesObj.seek(0)
@@ -143,9 +143,14 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-    with open('output.png', 'wb') as f:
+    print [hex(f) for f in bestImage.header]
+
+    with open('output.tif', 'wb') as f:
         f.write(bestImage.header)
         f.write(bestBuffer)
+
+    timg = Image.open('output.tif')
+    timg.save('output.png', 'PNG')
 
 if __name__ == '__main__':
     main()
