@@ -5,7 +5,7 @@ import os
 import io
 import random
 
-NUM_GEN = 50
+NUM_GEN = 30
 PROB_MATE = 0.5
 PROB_MUT = 0.4
 PPM_HEADER = 3
@@ -14,12 +14,13 @@ PPM_HEADER = 3
 class ImageWrapper(object):
     def __init__(self, filename):
         img = Image.open(filename)
+        img = img.convert('RGB')
         bytesObj = io.BytesIO()
 
         self.width = img.width
         self.height = img.height
 
-        img.save(bytesObj, 'PPM', compression='')
+        img.save(bytesObj, 'PPM')
         img.close()
 
         bytesObj.seek(0)
