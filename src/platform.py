@@ -1,4 +1,4 @@
-from PIL import Image
+from ImageWrapper import *
 from deap import base, creator, tools
 import sys
 import os
@@ -8,30 +8,6 @@ import random
 NUM_GEN = 30
 PROB_MATE = 0.5
 PROB_MUT = 0.4
-PPM_HEADER = 3
-
-# Wrapper to extract bytes from an image
-class ImageWrapper(object):
-    def __init__(self, filename):
-        img = Image.open(filename)
-        img = img.convert('RGB')
-        bytesObj = io.BytesIO()
-
-        self.width = img.width
-        self.height = img.height
-
-        img.save(bytesObj, 'PPM')
-        img.close()
-
-        bytesObj.seek(0)
-        self.rawBytes = bytesObj.readlines()
-        self.header = self.rawBytes[:PPM_HEADER]
-        self.bytes = bytearray(self.rawBytes[PPM_HEADER])
-
-        bytesObj.close()
-
-    def copy(self, img):
-        img.bytes = bytearray(self.bytes)
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename):

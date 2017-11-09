@@ -3,30 +3,43 @@ import io
 import numpy
 import math
 
-def trim(im):
-    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
-    diff = ImageChops.difference(im, bg)
-    diff = ImageChops.add(diff, diff, 2.0, -100)
-    bbox = diff.getbbox()
-    if bbox:
-        return im.crop(bbox)
+PPM_HEADER = 3
 
-def main():
-   imagePath = "cactusman.jpg"
-   # imagePath = "splice.png"
-   # imagePath = "bird.png"
-   ImageFile.LOAD_TRUNCATED_IMAGES = True
+# Wrapper to extract bytes from an image
+class ImageWrapper(object):
+    def __init__(self, filename):
+        img = Image.open(filename).convert('RGB')
+        self.trim(img)
+        self.filename = filename
 
-   image = Image.open(imagePath).convert("RGB")
-   bytesObj = io.BytesIO()
+        bytesObj = io.BytesIO()
 
-   trimmedImage = trim(image)
+        self.width = img.width
+        self.height = img.height
 
-   # image.save("parsed.png", format="PNG")
-   # out = trimmedImage.filter(ImageFilter.FIND_EDGES)
-   # out.show()
-   fitnessFunction(trimmedImage)
-   trimmedImage.save("out.png", format="PNG")
+        img.save(bytesObj, 'PPM')
+        img.close()
+
+        bytesObj.seek(0)
+        self.rawBytes = bytesObj.readlines()
+        self.header = self.rawBytes[:PPM_HEADER]
+        self.bytes = bytearray(self.rawBytes[PPM_HEADER])
+
+        bytesObj.close()
+
+    def copy(self, img):
+        img.bytes = bytearray(self.bytes)
+
+    def trim(self, img):
+        bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
+        diff = ImageChops.difference(img, bg)
+        diff = ImageChops.add(diff, diff, 2.0, -100)
+        bbox = diff.getbbox()
+
+        if bbox:
+            return img.crop(bbox)
+
+        raise ValueError('missing bounding box for image %s' % self.filename)
 
 def fitnessFunction(image):
   #Image Info (w/o background color)
