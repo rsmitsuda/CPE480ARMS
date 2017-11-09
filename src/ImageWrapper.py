@@ -16,6 +16,7 @@ class ImageWrapper(object):
 
         self.width = img.width
         self.height = img.height
+        self.colors = img.getcolors()
 
         img.save(bytesObj, 'PPM')
         img.close()

@@ -26,9 +26,17 @@ def evaluate(img):
 def validateArgs(args):
     parsed = []
 
+    if len(args) % 2:
+        sys.stderr.write('invalid number of arguments\n')
+        sys.exit(1)
+
     for i in range(0, len(args), 2):
         try:
             inputPair = (args[i], float(args[i + 1]))
+
+            if inputPair[1] < 0.0 or inputPair[1] > 1.0:
+                raise ValueError('invalid weight')
+
         except ValueError:
             sys.stderr.write('Invalid weight - %s\n' % (args[i + 1]))
             sys.exit(1)
