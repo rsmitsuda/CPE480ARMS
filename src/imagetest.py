@@ -5,10 +5,10 @@ import os
 import io
 import random
 
-NUM_GEN = 20
+NUM_GEN = 50
 PROB_MATE = 0.5
-PROB_MUT = 0.2
-PNG_HEADER_SIZE = 8
+PROB_MUT = 0.4
+PPM_HEADER = 3
 
 # Wrapper to extract bytes from an image
 class ImageWrapper(object):
@@ -19,13 +19,13 @@ class ImageWrapper(object):
         self.width = img.width
         self.height = img.height
 
-        img.save(bytesObj, 'TIFF', compression='')
+        img.save(bytesObj, 'PPM', compression='')
         img.close()
 
         bytesObj.seek(0)
-        self.rawBytes = bytearray(bytesObj.read1(-1))
-        self.header = self.rawBytes[:PNG_HEADER_SIZE]
-        self.bytes = self.rawBytes[PNG_HEADER_SIZE:]
+        self.rawBytes = bytesObj.readlines()
+        self.header = self.rawBytes[:PPM_HEADER]
+        self.bytes = bytearray(self.rawBytes[PPM_HEADER])
 
         bytesObj.close()
 
@@ -143,11 +143,13 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-    with open('output.tiff', 'wb') as f:
-        f.write(bestImage.header)
+    with open('output.ppm', 'wb') as f:
+        for l in bestImage.header:
+            f.write(l)
+
         f.write(bestBuffer)
 
-    timg = Image.open('output.tiff')
+    timg = Image.open('output.ppm')
     timg.save('output.png', 'PNG')
 
 if __name__ == '__main__':
