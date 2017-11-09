@@ -16,7 +16,6 @@ class ImageWrapper(object):
 
         self.width = img.width
         self.height = img.height
-        self.colors = img.getcolors()
 
         img.save(bytesObj, 'PPM')
         img.close()
@@ -27,9 +26,6 @@ class ImageWrapper(object):
         self.bytes = bytearray(self.rawBytes[PPM_HEADER])
 
         bytesObj.close()
-
-    def copy(self, img):
-        img.bytes = bytearray(self.bytes)
 
     def trim(self, img):
         bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
