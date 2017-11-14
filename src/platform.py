@@ -14,16 +14,35 @@ W_AVG = 0.3
 W_MODE = 0.1
 W_STD = 0.1
 
+# Clamps a value in the range of 0 to 255
+def clamp(val):
+    if val < 0.0:
+        val = 0.0
+    elif val > 255.0:
+        val = 255.0
+
+    return int(val)
+
 # Creates a DEAP bytearray individual from a filename
-def createImageInd(filename):
+def createImageInd(filename, weight):
     img = creator.Image()   
-    imgWrap = ImageWrapper(filename)
+    imgWrap = ImageWrapper(filename, weight)
     img[:] = imgWrap.bytes
     img.width = imgWrap.width
     img.height = imgWrap.height
     img.header = imgWrap.header
+    img.weight = imgWrap.weight
 
     return img
+
+# Blends two images based on their weight
+def blendImgs(img1, img2):
+    weightDiff = img1.weight - img2.weight
+
+    if weightDiff < 0.0:
+        weightDiff = 1.0 - weightDiff
+
+    tools.cxUniform(img1, img2, PROB_MATE + weightDiff)
 
 def evaluate(img):
     histogram = {}
@@ -84,11 +103,11 @@ def main():
 
     creator.create('MaxFitness', base.Fitness, weights=(1.0,))
     creator.create('Image', list, fitness=creator.MaxFitness, width=0, \
-            height=0, header=None)
+            height=0, header=None, weight=0.0)
 
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
-    toolbox.register('mate', tools.cxTwoPoint)
+    toolbox.register('mate', blendImgs)
     toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1.0,\
             indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
@@ -101,7 +120,7 @@ def runIterations(toolbox, args):
        
     for a in args:
         try:
-            population.append(toolbox.addImg(a[0]))
+            population.append(toolbox.addImg(a[0], a[1]))
         except Exception as e:
             print e
             sys.stderr.write('Invalid filename - %s\n' % (a[0]))

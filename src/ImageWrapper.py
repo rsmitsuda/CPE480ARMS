@@ -7,7 +7,7 @@ PPM_HEADER = 3
 
 # Wrapper to extract bytes from an image
 class ImageWrapper(object):
-    def __init__(self, filename):
+    def __init__(self, filename, weight):
         img = Image.open(filename).convert('RGB')
         self.trim(img)
         self.filename = filename
@@ -16,6 +16,7 @@ class ImageWrapper(object):
 
         self.width = img.width
         self.height = img.height
+        self.weight = weight
 
         img.save(bytesObj, 'PPM')
         img.close()
