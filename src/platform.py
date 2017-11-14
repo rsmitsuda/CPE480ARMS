@@ -173,13 +173,15 @@ def outputImages(population, n):
 
     bestBuffer = ''.join([chr(i) for i in numVals])
 
-    with open('output.ppm', 'wb') as f:
+    with open('output.ppm', 'wb+') as f:
         for l in bestImage.header:
             f.write(l)
 
         f.write(bestBuffer)
 
     timg = Image.open('output.ppm')
+    # print("sadf")
+    # timg.show()
     timg.save('output.png', 'PNG')
 
 if __name__ == '__main__':
