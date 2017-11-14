@@ -48,7 +48,7 @@ def evaluate(img):
     histogram = {}
 
     for i in range(0, len(img), RGB):
-        color = ''.join([str(j) for j in img[i:i + RGB]])
+        color = ''.join([str(int(j)) for j in img[i:i + RGB]])
 
         if color not in histogram:
             histogram[color] = 0
