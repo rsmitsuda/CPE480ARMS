@@ -11,7 +11,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class ImageWrapper(object):
     def __init__(self, filename, weight):
         img = Image.open(filename).convert('RGB')
-        self.trim(img)
+        img = self.trim(img)
         self.filename = filename
 
         bytesObj = io.BytesIO()
