@@ -4,6 +4,7 @@ import sys
 import os
 import io
 import random
+import numpy
 
 NUM_GEN = 50
 PROB_MATE = 0.5
@@ -11,6 +12,7 @@ PROB_MUT = 0.5
 RGB = 3
 W_AVG = 0.3
 W_MODE = 0.1
+W_STD = 0.1
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename):
@@ -34,14 +36,16 @@ def evaluate(img):
 
         histogram[color] += 1
 
-    avgColor = float(sum(img) / len(img))
+    avgColor = numpy.mean(img) / 255.0
     modeColor = max([(color, histogram[color]) for color in histogram], \
         key=lambda s : s[1])[0]
 
-    modeVal = ord(modeColor[0]) << 16 + ord(modeColor[1]) << 8 \
-        + ord(modeColor[2])
+    modeVal = (ord(modeColor[0]) << 16 + ord(modeColor[1]) << 8 \
+        + ord(modeColor[2])) / float(0xffffff)
 
-    total = W_AVG * avgColor + W_MODE * (modeVal - 0xffffff);
+    stdDev = numpy.std(img) / 255.0
+
+    total = W_AVG * avgColor + W_MODE * modeVal - W_STD * stdDev;
 
     return (total,)
 
