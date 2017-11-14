@@ -5,6 +5,8 @@ import math
 
 PPM_HEADER = 3
 
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # Wrapper to extract bytes from an image
 class ImageWrapper(object):
     def __init__(self, filename, weight):
