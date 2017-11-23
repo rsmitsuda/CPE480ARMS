@@ -4,7 +4,8 @@ import numpy
 import math
 
 PPM_HEADER = 3
-
+WIDTH = 24
+HEIGHT = 24
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Wrapper to extract bytes from an image
@@ -12,6 +13,12 @@ class ImageWrapper(object):
     def __init__(self, filename, weight):
         img = Image.open(filename).convert('RGB')
         img = self.trim(img)
+
+        if img.width != WIDTH and img.height != HEIGHT:
+           resized = img.resize((WIDTH, HEIGHT))
+           img.close()
+           img = resized
+
         self.filename = filename
 
         bytesObj = io.BytesIO()
