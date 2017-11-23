@@ -9,31 +9,27 @@ import numpy
 NUM_IND = 30
 NUM_GEN = 50
 PROB_MATE = 0.6
-PROB_MUT = 0.5
+PROB_MUT = 0.2
 RGB = 3
-W_AVG = 0.3
 W_MODE = 0.1
-W_STD = 0.3
+W_STD = 0.5
 W_DISTINCT = 0.5
-
-# Clamps a value in the range of 0 to 255
-def clamp(val):
-    if val < 0.0:
-        val = 0.0
-    elif val > 255.0:
-        val = 255.0
-
-    return int(val)
+W_DIFF = 0.01
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename, weight):
     img = creator.Image()   
     imgWrap = ImageWrapper(filename, weight)
-    img[:] = imgWrap.bytes
     img.width = imgWrap.width
     img.height = imgWrap.height
     img.header = imgWrap.header
     img.weight = imgWrap.weight
+
+    imgBytes = imgWrap.bytes
+
+    for i in range(0, len(imgBytes), RGB):
+        r, g, b = imgBytes[i], imgBytes[i + 1], imgBytes[i + 2]
+        img.append(simpleHash(r, g, b))
 
     return img
 
@@ -49,19 +45,16 @@ def simpleHash(r, g, b):
 
 def evaluate(img):
     histogram = {}
-    curR, curG, curB = -1, -1, -1
     numColors = 0
+    curColor = -1
+    maxColor = float(0xffffff)
 
-    for i in range(0, len(img), RGB):
-        r, g, b = img[i], img[i + 1], img[i + 2]
-        color = simpleHash(r, g, b)
+    for i in range(len(img)):
+        color = img[i]
 
         # Count the number of contiguous colors
-        if curR != r or curG != g or curB != b:
-            curR = r
-            curG = g
-            curB = b
-
+        if color != curColor:
+            curColor = color
             numColors += 1
 
         if color not in histogram:
@@ -69,16 +62,23 @@ def evaluate(img):
 
         histogram[color] += 1
 
-    avgColor = numpy.mean(img) / 255.0
-    modeColor = max([(color, histogram[color]) for color in histogram], \
-        key=lambda s : s[1])[0]
+    # Get the primary and secondary colors
+    pairs = [(color, histogram[color]) for color in histogram]
+    maxPair = max(pairs, key=lambda s : s[1])
+    pairs.remove(maxPair)
+    nextPair = max(pairs, key=lambda s : s[1])
 
-    modeVal = float(modeColor) / 0xffffff
+    priColor = maxPair[0]
+    nextColor = nextPair[0]
 
-    stdDev = numpy.std(img) / 255.0
+    # Make sure the colors don't clash by checking the complementary difference
+    colorDiff = priColor - (~nextColor & 0xffffff)
 
-    total = img.weight * (W_AVG * avgColor + W_MODE * modeVal - W_STD * stdDev)\
-       / (W_DISTINCT * numColors);
+    modeVal = float(priColor) / maxColor
+    stdDev = numpy.std(img) / maxColor
+
+    total = img.weight * (modeVal - stdDev - W_DIFF * colorDiff)\
+        / (W_DISTINCT * numColors);
 
     return (total,)
 
@@ -122,7 +122,8 @@ def main():
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
     toolbox.register('mate', blendImgs)
-    toolbox.register('mutate', tools.mutShuffleIndexes, indpb=0.01)
+    toolbox.register('mutate', tools.mutUniformInt, low=0, up=0xffffff, \
+        indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
 
@@ -181,16 +182,17 @@ def outputImages(population, n):
     best = tools.selBest(population, n)   
 
     bestImage = best[0]
+    bestBuffer = bytearray()
 
-    numVals = [int(b) for b in bestImage]
+    # Separate the colors back into their bytes
+    for color in bestImage:
+        r = (color >> 16) & 0xff
+        g = (color >> 8) & 0xff
+        b = color & 0xff
 
-    for i in range(len(numVals)):
-        if numVals[i] > 255:
-            numVals[i] = 255
-        if numVals[i] < 0:
-            numVals[i] = 0
-
-    bestBuffer = ''.join([chr(i) for i in numVals])
+        bestBuffer.append(chr(r))
+        bestBuffer.append(chr(g))
+        bestBuffer.append(chr(b))
 
     with open('output.ppm', 'wb+') as f:
         for l in bestImage.header:
@@ -199,8 +201,6 @@ def outputImages(population, n):
         f.write(bestBuffer)
 
     timg = Image.open('output.ppm')
-    # print("sadf")
-    # timg.show()
     timg.save('output.png', 'PNG')
 
 if __name__ == '__main__':
