@@ -8,7 +8,7 @@ import numpy
 
 NUM_IND = 30
 NUM_GEN = 50
-PROB_MATE = 0.5
+PROB_MATE = 0.6
 PROB_MUT = 0.5
 RGB = 3
 W_AVG = 0.3
@@ -40,6 +40,8 @@ def createImageInd(filename, weight):
 # Blends two images based on their weight
 def blendImgs(img1, img2):
     tools.cxTwoPoint(img1, img2)
+
+    img1.weight = img2.weight = (img1.weight + img2.weight) / 2
 
 # Simple hash function for rgb color values
 def simpleHash(r, g, b):
