@@ -9,14 +9,14 @@ import numpy
 EPSILON = 0.000001
 NUM_IND = 30
 NUM_GEN = 50
-PROB_MATE = 0.6
-PROB_MUT = 0.4
+PROB_MATE = 0.5
+PROB_MUT = 0.3
 RGB = 3
 W_MODE = 0.1
-W_STD = 2.5
-W_VAR = 2.5
+W_STD = 5
+W_VAR = 5
 W_DISTINCT = 0.5
-W_DIFF = 0.01
+W_DIFF = 0.001
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename, weight):
@@ -37,7 +37,7 @@ def createImageInd(filename, weight):
 
 # Blends two images based on their weight
 def blendImgs(img1, img2):
-    tools.cxOnePoint(img1, img2)
+    tools.cxTwoPoint(img1, img2)
 
     img1.weight = img2.weight = (img1.weight + img2.weight) / 2
 
