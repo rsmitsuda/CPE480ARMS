@@ -13,9 +13,10 @@ PROB_MATE = 0.6
 PROB_MUT = 0.4
 RGB = 3
 W_MODE = 0.1
-W_STD = 0.5
+W_STD = 2.5
+W_VAR = 2.5
 W_DISTINCT = 0.5
-W_DIFF = 0.001
+W_DIFF = 0.01
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename, weight):
@@ -36,7 +37,7 @@ def createImageInd(filename, weight):
 
 # Blends two images based on their weight
 def blendImgs(img1, img2):
-    tools.cxUniform(img1, img2, PROB_MATE)
+    tools.cxOnePoint(img1, img2)
 
     img1.weight = img2.weight = (img1.weight + img2.weight) / 2
 
@@ -76,10 +77,11 @@ def evaluate(img):
     colorDiff = priColor - (~nextColor & 0xffffff)
 
     modeVal = float(priColor) / maxColor
-    stdDev = numpy.std(img) / maxColor
+    stdDev = numpy.std(img) * W_STD
+    variance = numpy.var(img) * W_VAR
 
-    total = img.weight * (modeVal - stdDev - W_DIFF * colorDiff)\
-        / (W_DISTINCT * numColors);
+    total = img.weight * (modeVal - stdDev - variance - W_DIFF * colorDiff)\
+        / pow(W_DISTINCT * numColors, 2);
 
     return (total,)
 
@@ -123,7 +125,7 @@ def main():
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
     toolbox.register('mate', blendImgs)
-    toolbox.register('mutate', tools.mutUniformInt, low=0, up=0xffffff, \
+    toolbox.register('mutate', tools.mutGaussian, mu=0x777777, sigma=1.0, \
         indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
@@ -187,6 +189,8 @@ def outputImages(population, n):
 
     # Separate the colors back into their bytes
     for color in bestImage:
+        color = int(color)
+
         r = (color >> 16) & 0xff
         g = (color >> 8) & 0xff
         b = color & 0xff
