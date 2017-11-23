@@ -6,15 +6,16 @@ import io
 import random
 import numpy
 
+EPSILON = 0.000001
 NUM_IND = 30
 NUM_GEN = 50
 PROB_MATE = 0.6
-PROB_MUT = 0.2
+PROB_MUT = 0.4
 RGB = 3
 W_MODE = 0.1
 W_STD = 0.5
 W_DISTINCT = 0.5
-W_DIFF = 0.01
+W_DIFF = 0.001
 
 # Creates a DEAP bytearray individual from a filename
 def createImageInd(filename, weight):
@@ -35,7 +36,7 @@ def createImageInd(filename, weight):
 
 # Blends two images based on their weight
 def blendImgs(img1, img2):
-    tools.cxTwoPoint(img1, img2)
+    tools.cxUniform(img1, img2, PROB_MATE)
 
     img1.weight = img2.weight = (img1.weight + img2.weight) / 2
 
@@ -102,7 +103,7 @@ def validateArgs(args):
 
         parsed.append(inputPair)
 
-    if sum([a[1] for a in parsed]) != 1.0:
+    if abs(sum([a[1] for a in parsed]) - 1.0) > EPSILON:
         sys.stderr.write('Weights must add up to 1\n')
         sys.exit(1)
 
