@@ -6,6 +6,7 @@ import io
 import random
 import numpy
 
+NUM_IND = 30
 NUM_GEN = 50
 PROB_MATE = 0.5
 PROB_MUT = 0.5
@@ -13,7 +14,7 @@ RGB = 3
 W_AVG = 0.3
 W_MODE = 0.1
 W_STD = 0.3
-W_DISTINCT = 0.4
+W_DISTINCT = 0.5
 
 # Clamps a value in the range of 0 to 255
 def clamp(val):
@@ -38,13 +39,7 @@ def createImageInd(filename, weight):
 
 # Blends two images based on their weight
 def blendImgs(img1, img2):
-    weightDiff = img1.weight - img2.weight
-
-    if weightDiff < 0.0:
-        weightDiff = 1.0 - weightDiff
-
-    tools.cxUniform(img1, img2, PROB_MATE)
-    tools.cxPartialyMatched(img1, img2)
+    tools.cxTwoPoint(img1, img2)
 
 # Simple hash function for rgb color values
 def simpleHash(r, g, b):
@@ -76,7 +71,7 @@ def evaluate(img):
     modeColor = max([(color, histogram[color]) for color in histogram], \
         key=lambda s : s[1])[0]
 
-    modeVal = modeColor / float(0xffffff)
+    modeVal = float(modeColor) / 0xffffff
 
     stdDev = numpy.std(img) / 255.0
 
@@ -133,14 +128,20 @@ def main():
 
 def runIterations(toolbox, args):
     population = []
-       
-    for a in args:
+    i = 0
+
+    # Make enough individuals for a population, with possible duplicates
+    while i < NUM_IND:
+        a = args[i % len(args)]
+
         try:
             population.append(toolbox.addImg(a[0], a[1]))
         except Exception as e:
             print e
             sys.stderr.write('Invalid filename - %s\n' % (a[0]))
             sys.exit(1)
+
+        i += 1
 
     for p in population:
         p.fitness.values = evaluate(p)
