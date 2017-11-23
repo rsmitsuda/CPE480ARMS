@@ -13,7 +13,7 @@ RGB = 3
 W_AVG = 0.3
 W_MODE = 0.1
 W_STD = 0.3
-W_DISTINCT = 0.3
+W_DISTINCT = 0.4
 
 # Clamps a value in the range of 0 to 255
 def clamp(val):
@@ -44,6 +44,11 @@ def blendImgs(img1, img2):
         weightDiff = 1.0 - weightDiff
 
     tools.cxUniform(img1, img2, PROB_MATE)
+    tools.cxPartialyMatched(img1, img2)
+
+# Simple hash function for rgb color values
+def simpleHash(r, g, b):
+    return (int(r) << 16) + (int(g) << 8) + int(b)
 
 def evaluate(img):
     histogram = {}
@@ -51,8 +56,8 @@ def evaluate(img):
     numColors = 0
 
     for i in range(0, len(img), RGB):
-        color = ''.join([str(int(j)) for j in img[i:i + RGB]])
         r, g, b = img[i], img[i + 1], img[i + 2]
+        color = simpleHash(r, g, b)
 
         # Count the number of contiguous colors
         if curR != r or curG != g or curB != b:
@@ -71,8 +76,7 @@ def evaluate(img):
     modeColor = max([(color, histogram[color]) for color in histogram], \
         key=lambda s : s[1])[0]
 
-    modeVal = (ord(modeColor[0]) << 16 + ord(modeColor[1]) << 8 \
-        + ord(modeColor[2])) / float(0xffffff)
+    modeVal = modeColor / float(0xffffff)
 
     stdDev = numpy.std(img) / 255.0
 
@@ -121,8 +125,7 @@ def main():
     toolbox = base.Toolbox()
     toolbox.register('addImg', createImageInd)
     toolbox.register('mate', blendImgs)
-    toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1.0,\
-            indpb=0.01)
+    toolbox.register('mutate', tools.mutShuffleIndexes, indpb=0.01)
     toolbox.register('select', tools.selTournament, tournsize=3)
     toolbox.register('evaluate', evaluate)
 
