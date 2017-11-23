@@ -12,7 +12,8 @@ PROB_MUT = 0.5
 RGB = 3
 W_AVG = 0.3
 W_MODE = 0.1
-W_STD = 0.1
+W_STD = 0.3
+W_DISTINCT = 0.3
 
 # Clamps a value in the range of 0 to 255
 def clamp(val):
@@ -42,13 +43,24 @@ def blendImgs(img1, img2):
     if weightDiff < 0.0:
         weightDiff = 1.0 - weightDiff
 
-    tools.cxUniform(img1, img2, PROB_MATE + weightDiff)
+    tools.cxUniform(img1, img2, PROB_MATE)
 
 def evaluate(img):
     histogram = {}
+    curR, curG, curB = -1, -1, -1
+    numColors = 0
 
     for i in range(0, len(img), RGB):
         color = ''.join([str(int(j)) for j in img[i:i + RGB]])
+        r, g, b = img[i], img[i + 1], img[i + 2]
+
+        # Count the number of contiguous colors
+        if curR != r or curG != g or curB != b:
+            curR = r
+            curG = g
+            curB = b
+
+            numColors += 1
 
         if color not in histogram:
             histogram[color] = 0
@@ -64,7 +76,8 @@ def evaluate(img):
 
     stdDev = numpy.std(img) / 255.0
 
-    total = W_AVG * avgColor + W_MODE * modeVal - W_STD * stdDev;
+    total = img.weight * (W_AVG * avgColor + W_MODE * modeVal - W_STD * stdDev)\
+       / (W_DISTINCT * numColors);
 
     return (total,)
 
