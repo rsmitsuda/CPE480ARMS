@@ -76,12 +76,16 @@ def evaluate(img):
     # Make sure the colors don't clash by checking the complementary difference
     colorDiff = priColor - (~nextColor & 0xffffff)
 
+    # Make sure the colors aren't too close
+    colorDiff2 = priColor - nextColor
+
     modeVal = float(priColor) / maxColor
     stdDev = numpy.std(img) * W_STD
     variance = numpy.var(img) * W_VAR
 
-    total = img.weight * (modeVal - stdDev - variance - W_DIFF * colorDiff)\
-        / pow(W_DISTINCT * numColors, 2);
+    total = img.weight * (modeVal - stdDev - variance \
+        + W_DIFF * (colorDiff2 - colorDiff)) \
+        / pow(W_DISTINCT * numColors, 2)
 
     return (total,)
 
