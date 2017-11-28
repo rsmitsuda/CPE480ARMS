@@ -9,7 +9,7 @@ import numpy
 EPSILON = 0.000001
 NUM_IND = 30
 NUM_GEN = 50
-PROB_MATE = 0.5
+PROB_MATE = 0.6
 PROB_MUT = 0.3
 RGB = 3
 W_MODE = 0.1
